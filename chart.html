@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>D3 Animated Bar Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <svg width="600" height="400"></svg>
+    <script>
+        // Set the dimensions and margins of the graph
+        const margin = {top: 20, right: 30, bottom: 40, left: 40},
+              width = 600 - margin.left - margin.right,
+              height = 400 - margin.top - margin.bottom;
+
+        // Append the svg object to the body of the page
+        const svg = d3.select("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Sample data
+        const data = [
+          {name: "A", value: 30},
+          {name: "B", value: 80},
+          {name: "C", value: 45},
+          {name: "D", value: 60},
+          {name: "E", value: 20},
+          {name: "F", value: 90},
+          {name: "G", value: 55},
+        ];
+
+        // X axis
+        const x = d3.scaleBand()
+            .domain(data.map(d => d.name))
+            .range([0, width])
+            .padding(0.1);
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x));
+
+        // Y axis
+        const y = d3.scaleLinear()
+            .domain([0, 100])
+            .range([height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        // Bars
+        const bars = svg.selectAll(".bar")
+          .data(data)
+          .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.name))
+            .attr("y", d => y(d.value))
+            .attr("width", x.bandwidth())
+            .attr("height", d => height - y(d.value))
+            .attr("fill", "steelblue");
+
+        // Function to generate a random color
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; 6 > i; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Animation function
+        function animateBars() {
+            bars.transition()
+                .duration(500)
+                .attr("y", d => y(d.value * 0.9))
+                .attr("height", d => height - y(d.value * 0.9))
+                .attr("fill", getRandomColor)
+              .transition()
+                .duration(500)
+                .attr("y", d => y(d.value))
+                .attr("height", d => height - y(d.value))
+                .attr("fill", getRandomColor)
+              .on("end", animateBars); // Repeat the animation
+        }
+
+        // Start the animation
+        animateBars();
+    </script>
+</body>
+</html>
